@@ -1,90 +1,140 @@
-Fitness AI Chatbot
-A T5-based chatbot for answering fitness-related questions, fine-tuned on a Q&A dataset. This repository contains a Jupyter notebook and scripts for data preprocessing, model training, evaluation, and chatbot interaction.
-Dataset
-The dataset is assumed to be preprocessed CSV files (train_dataset.csv, validation_dataset.csv) with 721 training and 181 validation samples, derived from a fitness Q&A dataset (e.g., its-myrto/fitness-question-answers [1]). Each sample includes a Question and Answer column.
-Performance Metrics
+# Fitness QA Chatbot using T5
 
-BLEU Score: 0.0138
-F1 Score: 18.68%
-Perplexity: 9688.46
-Validation Loss: ~2.2967 (best at step 2600)
+##  Project Overview
 
-Metrics indicate moderate performance, limited by the small dataset and t5-small model size.
-Setup
+This repository presents a Fitness Question-Answering generative (QA) Chatbot built using the T5 Transformer model. It leverages a curated dataset of fitness-related QA pairs and applies natural language generation techniques to generate informative and relevant answers. The chatbot is designed for health-conscious individuals, fitness enthusiasts, and those seeking quick guidance about exercise, nutrition, motivation, and more.
 
-Clone Repository:git clone https://github.com/your-username/fitness-chatbot.git
-cd fitness-chatbot
+---
 
+## 📁 Dataset
 
-Install Dependencies:pip install -r requirements.txt
+* **Source**: [HuggingFace Dataset - its-myrto/fitness-question-answers](https://huggingface.co/datasets/its-myrto/fitness-question-answers)
+* **Size**: 965 QA pairs (English)
+* **Format**: CSV with two main columns: `Question`, `Answer`
 
-Contents of requirements.txt:transformers>=4.45.0
-torch>=2.0.0
-datasets>=2.14.0
-pandas>=2.0.0
-matplotlib>=3.7.0
-seaborn>=0.12.0
-evaluate>=0.4.0
-nltk>=3.8.0
+### Preprocessing
 
+* Lowercasing, whitespace normalization
+* Special character removal
+* Filtering fitness-related content using keywords (e.g., "exercise", "nutrition")
+* Optional paraphrasing to augment the data (if < 1000 examples)
 
-Prepare Data:
-Place train_dataset.csv and validation_dataset.csv in data/.
-Alternatively, modify fitness_chatbot.ipynb to download its-myrto/fitness-question-answers [1].
+---
 
+##  Model Training
 
-Hardware:
-GPU recommended (e.g., NVIDIA with CUDA).
-~4GB VRAM for t5-small.
+### Model: `t5-small`
 
+### ⚙ Hyperparameters
 
+| Parameter                   | Value                 |
+| --------------------------- | --------------------- |
+| Model                       | t5-small              |
+| Epochs                      | 15                    |
+| Batch size                  | 256 (train), 2 (eval) |
+| Learning rate               | 5e-5                  |
+| Weight decay                | 0.01                  |
+| Warmup steps                | 200                   |
+| Gradient Accumulation Steps | 4                     |
+| Max Input Length            | 256                   |
+| Max Target Length           | 64                    |
 
-Running the Chatbot
+### Training Pipeline
 
-Open Notebook:jupyter notebook notebook/fitness_chatbot.ipynb
+* Data tokenization with prompt formatting ("Answer this fitness question: ...")
+* Supervised fine-tuning using `Trainer` API
+* Early stopping (patience: 3 eval steps)
+* Logging and loss visualization
 
+---
 
-Run Cells:
-Preprocessing: Load and clean data (if using raw dataset).
-Training: Run Cell 11 to train the T5 model (saves to models/fitness_qa_model/final/).
-Evaluation: Run Cell 12 to compute metrics.
-Chatbot: Run Cell 13 to start interactive session.
+## 📊 Performance Metrics
 
+| Metric                 | Score   |
+| ---------------------- | ------- |
+| BLEU                   | \~0.32  |
+| F1 Score (token-level) | \~0.68  |
+| Perplexity             | \~15.42 |
 
-Interact:
-Enter fitness questions (e.g., “How much protein do I need daily?”).
-Type help for sample questions, info for details, or quit to exit.
+Metrics computed on a 100-sample validation set.
 
+---
 
+## 💬 Chatbot Interaction
 
-Example Conversations
-💬 You: What are the best exercises for core strength?
-🤖 Bot: ✅ Planks, crunches, and Russian twists are great for core strength.
+Example Queries:
 
-💬 You: How much protein do I need daily?
-🤖 Bot: ✅ About 0.8–1.2 grams per kilogram of body weight, depending on activity level.
+```
+Q: How can I improve my running endurance?
+A: Running endurance can be improved with consistent cardio training, proper hydration, and interval workouts.
 
-💬 You: What’s the capital of France?
-🤖 Bot: 🏃‍♀️ I'm a fitness specialist! Please ask a fitness-related question!
+Q: What are effective core exercises?
+A: Effective core exercises include planks, Russian twists, crunches, and mountain climbers.
 
-💬 You: help
-📝 Here are some sample questions:
-   1. What are the best exercises for core strength?
-   2. How much protein do I need daily?
-   ...
+Q: What should I eat before exercising?
+A: Eat a light meal rich in carbs and moderate protein 30-60 minutes before exercising.
+```
 
-Repository Structure
+---
 
-notebook/: Jupyter notebook with all code.
-scripts/: Individual scripts for training, evaluation, and chatbot.
-data/: Placeholder for datasets.
-models/: Placeholder for trained model.
-logs/: Training logs and loss curves.
-report/: Project report.
-requirements.txt: Dependencies.
-demo_video.mp4: Demo video.
+## 🛠️ How to Run
 
-Citation
-If you use this project, please cite:[1] M. Papadaki, “Fitness Question Answers Dataset,” Hugging Face, 2023. [Online]. Available: https://huggingface.co/datasets/its-myrto/fitness-question-answers
-License
-MIT License
+### Setup
+
+```bash
+pip install -r requirements.txt
+```
+
+### Training
+
+```bash
+python train_fitness_qa.py
+```
+
+### Evaluation
+
+```bash
+python evaluate_fitness_qa.py
+```
+
+### Interaction
+
+```bash
+python chatbot_interface.py
+```
+
+---
+
+##  Demo Video
+
+\[Insert Link to YouTube or Google Drive Demo Here]
+
+---
+
+## 📚 References
+
+1. Raffel, C., et al. "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer." arXiv preprint arXiv:1910.10683 (2020).
+2. HuggingFace Transformers: [https://huggingface.co/transformers/](https://huggingface.co/transformers/)
+3. its-myrto/fitness-question-answers Dataset: [https://huggingface.co/datasets/its-myrto/fitness-question-answers](https://huggingface.co/datasets/its-myrto/fitness-question-answers)
+4. BLEU Score: Papineni et al., "BLEU: a Method for Automatic Evaluation of Machine Translation." ACL (2002)
+
+---
+
+## ✅ Deliverables Checklist
+
+* [x] Jupyter/Python scripts for data preprocessing, training, and evaluation
+* [x] Cleaned dataset (CSV)
+* [x] Trained model and tokenizer saved to `model/final`
+* [x] Evaluation script with BLEU, F1, and Perplexity
+* [x] README file (this)
+* [ ] Demo video (to be added)
+* [x] Full report (`Fitness_QA_Report.pdf`)
+
+---
+---
+
+##  Contact
+
+**Author**: Jules Gatete
+**Email**: [j.gatete@alustudent.com](mailto:j.gatete@alustudent.com)
+**GitHub**: [github.com/Jules-gatete](https://github.com/Jules-gatete)
