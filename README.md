@@ -1,103 +1,98 @@
-# Fitness QA Chatbot using T5
+# 🏋️‍♂ **FitCoachBot**: A Transformer-Based Fitness Q\&A Chatbot
 
-##  Project Overview
+## Project Overview
 
-This repository presents a Fitness Question-Answering generative (QA) Chatbot built using the T5 Transformer model. It leverages a curated dataset of fitness-related QA pairs and applies natural language generation techniques to generate informative and relevant answers. The chatbot is designed for health-conscious individuals, fitness enthusiasts, and those seeking quick guidance about exercise, nutrition, motivation, and more.
+**FitCoachBot** is a domain-specific chatbot trained on fitness-related questions using the `T5-small` transformer model. It answers queries about fitness, nutrition, workouts, and healthy living using natural language generation.
 
----
+##  Dataset
 
-## 📁 Dataset
+* **Source**: [its-myrto/fitness-question-answers](https://huggingface.co/datasets/its-myrto/fitness-question-answers)
+* **Original Size**: 965 Q\&A pairs
+* **Final Dataset**: 902 filtered fitness-related pairs (93.5% retained)
 
-* **Source**: [HuggingFace Dataset - its-myrto/fitness-question-answers](https://huggingface.co/datasets/its-myrto/fitness-question-answers)
-* **Size**: 965 QA pairs (English)
-* **Format**: CSV with two main columns: `Question`, `Answer`
+### Preprocessing Steps
 
-### Preprocessing
-
-* Lowercasing, whitespace normalization
-* Special character removal
-* Filtering fitness-related content using keywords (e.g., "exercise", "nutrition")
-* Optional paraphrasing to augment the data (if < 1000 examples)
-
----
-
-##  Model Training
-
-### Model: `t5-small`
-
-### ⚙ Hyperparameters
-
-| Parameter                   | Value                 |
-| --------------------------- | --------------------- |
-| Model                       | t5-small              |
-| Epochs                      | 15                    |
-| Batch size                  | 256 (train), 2 (eval) |
-| Learning rate               | 5e-5                  |
-| Weight decay                | 0.01                  |
-| Warmup steps                | 200                   |
-| Gradient Accumulation Steps | 4                     |
-| Max Input Length            | 256                   |
-| Max Target Length           | 64                    |
-
-### Training Pipeline
-
-* Data tokenization with prompt formatting ("Answer this fitness question: ...")
-* Supervised fine-tuning using `Trainer` API
-* Early stopping (patience: 3 eval steps)
-* Logging and loss visualization
+* Lowercased and cleaned text (punctuation and whitespace)
+* Tokenized using Hugging Face's `AutoTokenizer`
+* Prompt format:
+  `"Answer this fitness-related question: {question}"`
+* Truncated input to 512 tokens; output to 64 tokens
+* Filtered using fitness-related keywords
 
 ---
 
-## 📊 Performance Metrics
+## Model Architecture & Training
 
-| Metric                 | Score   |
-| ---------------------- | ------- |
-| BLEU                   | \~0.32  |
-| F1 Score (token-level) | \~0.68  |
-| Perplexity             | \~15.42 |
+* **Base Model**: `t5-small`
+* **Activation**: ReLU
+* **Training Strategy**: Instruction-style fine-tuning with Hugging Face `Trainer` API
 
-Metrics computed on a 100-sample validation set.
+###  Hyperparameters
 
----
-
-## 💬 Chatbot Interaction
-
-Example Queries:
-
-```
-Q: How can I improve my running endurance?
-A: Running endurance can be improved with consistent cardio training, proper hydration, and interval workouts.
-
-Q: What are effective core exercises?
-A: Effective core exercises include planks, Russian twists, crunches, and mountain climbers.
-
-Q: What should I eat before exercising?
-A: Eat a light meal rich in carbs and moderate protein 30-60 minutes before exercising.
-```
+| Parameter               | Value        |
+| ----------------------- | ------------ |
+| Model                   | t5-small     |
+| Epochs                  | 15           |
+| Learning Rate           | 3e-5         |
+| Batch Size (Train/Eval) | 2 / 2        |
+| Max Input Length        | 512          |
+| Max Target Length       | 64           |
+| Warmup Steps            | 200          |
+| Weight Decay            | 0.01         |
+| Gradient Accumulation   | 4            |
+| Optimizer               | AdamW        |
+| Loss Function           | CrossEntropy |
+| Early Stopping          | ✅ Enabled    |
+| Checkpointing           | ✅ Enabled    |
 
 ---
 
-## 🛠️ How to Run
+## 📊 Evaluation Results
 
-### Setup
+| Metric         | Model 3 |  **Model 4 (Best)** |
+| -------------- | ------- | -------------------- |
+| **BLEU**       | 0.0132  | **0.0361**           |
+| **F1**         | 18.68%  | 17.03%               |
+| **Perplexity** | 9669.28 | **10819.09**         |
+
+✅ *Model 4 selected as final version for deployment.*
+
+---
+
+##  Chatbot Interaction
+
+
+---
+
+##  Deployment
+
+*  **API Repo**: [github.com/Jules-gatete/apifiteness](https://github.com/Jules-gatete/apifiteness)
+*  **Frontend (Vercel)**: [ml-techniques-i-chatbot.vercel.app](https://ml-techniques-i-chatbot.vercel.app)
+*  **Demo Video**: [YouTube - FitCoachBot](https://youtu.be/_4hFlLHi1m0)
+
+---
+
+##  Run Locally
+
+###  Setup
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Training
+###  Train the Model
 
 ```bash
 python train_fitness_qa.py
 ```
 
-### Evaluation
+### Evaluate
 
 ```bash
 python evaluate_fitness_qa.py
 ```
 
-### Interaction
+###  Chatbot Interface
 
 ```bash
 python chatbot_interface.py
@@ -105,36 +100,22 @@ python chatbot_interface.py
 
 ---
 
-##  Demo Video
+## Challenges Faced
 
-\[Insert Link to YouTube or Google Drive Demo Here]
-
----
-
-## 📚 References
-
-1. Raffel, C., et al. "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer." arXiv preprint arXiv:1910.10683 (2020).
-2. HuggingFace Transformers: [https://huggingface.co/transformers/](https://huggingface.co/transformers/)
-3. its-myrto/fitness-question-answers Dataset: [https://huggingface.co/datasets/its-myrto/fitness-question-answers](https://huggingface.co/datasets/its-myrto/fitness-question-answers)
-4. BLEU Score: Papineni et al., "BLEU: a Method for Automatic Evaluation of Machine Translation." ACL (2002)
+* Limited dataset (under 1,000 Q\&A pairs)
+* GPU memory constraints
+* Model underperformance on short or vague queries
 
 ---
 
-## ✅ Deliverables Checklist
+## Deliverables
 
-* [x] Jupyter/Python scripts for data preprocessing, training, and evaluation
-* [x] Cleaned dataset (CSV)
-* [x] Trained model and tokenizer saved to `model/final`
-* [x] Evaluation script with BLEU, F1, and Perplexity
-* [x] README file (this)
-* [ ] Demo video (to be added)
-* [x] Full report (`Fitness_QA_Report.pdf`)
+* [Frontend](https://ml-techniques-i-chatbot.vercel.app/)
+* [Demo Video](https://youtu.be/_4hFlLHi1m0)
+* Final Report (`Fitness_QA_Report.pdf`)
 
----
----
 
-##  Contact
+## Contact
 
 **Author**: Jules Gatete
-**Email**: [j.gatete@alustudent.com](mailto:j.gatete@alustudent.com)
-**GitHub**: [github.com/Jules-gatete](https://github.com/Jules-gatete)
+📧 Email: [j.gatete@alustudent.com](mailto:j.gatete@alustudent.com)
